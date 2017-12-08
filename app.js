@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const auth = require('./auth')
-const port = 8080
+const port = process.env.PORT || 3000
 const GOOGLE_API_KEY = 'key=AIzaSyAqcJLiH6zsbV4Cc3wxs454_DBqSg5lEy4'
 const DB_URI = 'mongodb://gabriel:gabrielase@ds125716.mlab.com:25716/ase-project'
 const https = require('https');
@@ -38,8 +38,8 @@ const protected = (req, res, next) => {
 }
 
 app.use(express.static('./'))
-app.listen($PORT)
-console.log('Listening on port: ', $PORT);
+app.listen(port)
+console.log('Listening on port: ', port);
 
 app.get('/', protected, (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
