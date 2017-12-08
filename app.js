@@ -46,7 +46,7 @@ app.get('/', protected, (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-app.get('/*.(js|css|jpg|png)', protected, (req, res) => {
+app.get('/*.(js|css|jpg|png|ico)', protected, (req, res) => {
   res.sendFile(__dirname + '/views' + req.url)
 })
 
