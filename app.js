@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const auth = require('./auth')
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 8080
 const GOOGLE_API_KEY = 'key=AIzaSyAqcJLiH6zsbV4Cc3wxs454_DBqSg5lEy4'
 const DB_URI = 'mongodb://gabriel:gabrielase@ds125716.mlab.com:25716/ase-project'
 const https = require('https');
@@ -28,13 +28,14 @@ const testMode = process.argv[2] === 'test'
 //If Test Mode, don't protect. Keeps from having to log in.
 const protected = (req, res, next) => {
   // :: if testmode, then dont protect
-  if (testMode) return next()
+/*  if (testMode) return next()
 
   if (req.cookies.account) {
     next()
   } else {
     return res.redirect('/login')
-  }
+  }*/
+  return next()
 }
 
 app.use(express.static('./'))
