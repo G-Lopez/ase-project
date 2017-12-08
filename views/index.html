@@ -1,0 +1,189 @@
+<html lang="en" ng-app='myApp'>
+
+<head>
+  <title>Lion Share</title>
+  <meta charset="UTF-8"></meta>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"></meta>
+  <link rel="icon" type="image/png" href="img/columbiaLionLogo.png"/>
+
+  <!-- Outside Libraries -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://code.angularjs.org/1.5.7/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nanobar/0.4.2/nanobar.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+
+  <!-- JS -->
+  <script src="js/index.js"></script>
+
+  <!--Angular Modules -->
+  <script src='js/searchResult.js'></script>
+  <script src='js/userInfo.js'></script>
+
+  <!--CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+
+<body>
+  <!--Bootstrap Nav Bar -->
+  <nav class="navbar navbar-default" ng-controller='navBarController'>
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#" ng-click='goHome()'>Lion Share</a>
+      </div>
+
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <form class="navbar-form navbar-left" ng-submit='search(titleSearchInput)'>
+          <div class="form-group">
+            <input id='navBarSearchBar' type="text" class="form-control" placeholder="Search Book Title" ng-model='titleSearchInput' required>
+          </div>
+          <button type="submit" class="btn btn-default">Search</button>
+        </form>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href='#' ng-click='advancedSearchNavBar()'>Advanced Search</a></li>
+          <li><a href='#' data-toggle='modal' data-target='#addBookModal'>Add Book</a></li>
+          <li class="dropdown">
+            <a style='font-size:1.5em' href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class='glyphicon glyphicon-cog'></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#" ng-click='account()'>Account</a></li>
+              <li><a href="#" ng-click='logOut()'>Log Out</a></li>
+
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Modal for Adding books to the exchange-->
+  <div ng-controller='addBookController'>
+    <div class="modal fade" id='addBookModal' tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h5 class="modal-title">Add a Book!</h5>
+          </div>
+          <div class="modal-body">
+            <form ng-submit='findBookWithISBN(isbn)'>
+              <label>Find Book With ISBN: </label> <input type='text' ng-model='isbn' required><button type='submit' class='btn btn-default'><span class='glyphicon glyphicon-search'></span></button>
+            </form>
+            <div ng-show='searchedBook.kind.length > 0'>
+              Title: {{searchedBook.volumeInfo.title || 'No Title'}} {{searchedBook.volumeInfo.subtitle || ''}} <br>
+              Author(s): {{searchedBook.volumeInfo.authors.join(', ') || 'Not Available'}}<br><br>
+              <img ng-src='{{getBookImage()}}' height='120px' width='120px'></img>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" ng-show='searchedBook.kind.length > 0' ng-click='addBooktoDB()'>Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class='homePage' ng-show='home' ng-controller='homePageController'>
+    <div class='col-sm-6 left-side'>
+      <h3 style='text-align:center' class='section-title'>Requests</h3>
+
+      <div class='col-sm-12 request-top'>
+        <h4 style='text-align:center'>To You</h4><br>
+        <div ng-repeat='request in requestsToUser'>
+          <div class='col-sm-8 request-book-info'>
+            {{request.title}}<br>
+            {{request.author}}<br><br>
+          </div>
+          <div class='col-sm-4 request-buttons'>
+            <button class='btn btn-danger btn-xs' ng-click='updateRequest(request,"Denied")' style='float:right'>Deny</button>
+            <button class='btn btn-success btn-xs' ng-click='updateRequest(request,"Approved")'style='float:right'>Accept</button>
+          </div>
+        </div>
+      </div>
+
+      <div class='col-sm-12 request-bottom'>
+        <h4 style='text-align:center'>By You</h4><br>
+        <div ng-repeat='request in requestsMadeByUser'>
+          <div class='col-sm-8 request-book-info'>
+            {{request.title}}<br>
+            {{request.author}}<br><br>
+          </div>
+          <div class='col-sm-4 request-buttons'>
+            <button class='btn btn-danger btn-xs' ng-click='deleteRequest(request)' style='float:right'>Delete Request</button>
+            <br><br>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class='col-sm-6 right-side'>
+      <h3 style='text-align:center' class='section-title'>Your Books</h3>
+
+      <div class='col-sm-12 owned-div'>
+        <h4 style='text-align:center'>Owned</h4>
+        <div ng-repeat='ownBook in ownedBooks'>
+          {{ownBook.title}}<br>
+          {{ownBook.authors}}<br>
+          Status: {{ownBook.status}}<br><br>
+        </div>
+      </div>
+
+      <div class='col-sm-12 borowed-div'>
+        <h4 style='text-align:center'>Borrowed</h4>
+        <div ng-repeat='borBook in borrowedBooks'>
+          {{borBook.title}}
+          {{borBook.authors}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class='searchResult' ng-show='searchPage' ng-controller='searchResultPageController'>
+    Result Page<br>
+    <span ng-show='results.length < 1'>Sorry, there were no results. Please try a different search.</span>
+    <div ng-repeat='result in results'>
+      Title: {{result.title}}<br>
+      Author(s): {{result.authors}}<br><br>
+      <button class='btn btn-primary' ng-click='requestBook(result.owner_email, result.isbn)'>Request Book</button>
+    </div>
+  </div>
+
+  <div class='advancedSearchStyle' ng-show='advancedSearchPage' ng-controller='advancedSearchController'>
+    <form class='advancedSearchForm' ng-submit='advancedSearch()'>
+      <div class="form-group">
+        <label for="titleInput">Title</label>
+        <input type="text" class="form-control" ng-model="formInputs.title" placeholder="Enter Title">
+      </div>
+      <div class="form-group">
+        <label for="authorInput">Author</label>
+        <input type="text" class="form-control" ng-model="formInputs.author" placeholder="Enter Author">
+      </div>
+      <div class="form-group">
+        <label for="isbnInput">ISBN</label>
+        <input type="number" class="form-control" ng-model="formInputs.isbn" placeholder="Enter ISBN">
+      </div>
+      <div class="form-group">
+        <label for="publisherInput">Publisher</label>
+        <input type="text" class="form-control" ng-model="formInputs.publisher" placeholder="Enter Publisher">
+      </div>
+      <div class="form-group">
+        <label for="pageInput">Minimum Number of Pages</label>
+        <input type="number" class="form-control" ng-model="formInputs.page" placeholder="Enter Pages">
+      </div>
+      <button type='submit' class='btn btn-primary'>Search!</button>
+    </form>
+  </div>
+
+
+</body>
+</html>
