@@ -27,15 +27,14 @@ const testMode = process.argv[2] === 'test'
 
 //If Test Mode, don't protect. Keeps from having to log in.
 const protected = (req, res, next) => {
-  // :: if testmode, then dont protect
-/*  if (testMode) return next()
+  // if testmode, then dont protect
+  if (testMode) return next()
 
   if (req.cookies.account) {
     next()
   } else {
     return res.redirect('/login')
-  }*/
-  return next()
+  }
 }
 
 app.use(express.static('./'))
