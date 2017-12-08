@@ -11,6 +11,9 @@
     "type": "git",
     "url": "git+https://Gabriel_Lopez@bitbucket.org/Gabriel_Lopez/ase-project.git"
   },
+  "engines":{
+    "node": "7.2.0"
+  },
   "author": "Gabriel Lopez",
   "dependencies": {
     "body-parser": "^1.17.2",
