@@ -3,3 +3,6 @@ git
 npm-debug.log
 .DS_Store
 /*.env
+mongotesting.js
+test.js
+ase-project.zip

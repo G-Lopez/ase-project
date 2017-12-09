@@ -2,7 +2,6 @@
   "name": "ASE-Project",
   "version": "1.0.0",
   "description": "Advanced Software Engineering Term Project",
-  "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
@@ -15,21 +14,16 @@
   },
   "author": "Gabriel Lopez",
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "cheerio": "^1.0.0-rc.1",
-    "compression": "^1.7.0",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.15.3",
-    "https": "^1.0.0",
-    "moment": "^2.18.1",
-    "mongoose": "^4.11.0",
-    "passport": "^0.3.2",
-    "passport-google-oauth2": "^0.1.6",
-    "superagent": "^3.5.2"
-  },
-  "devDependencies": {
-    "chai": "^4.0.2",
-    "mocha": "^3.4.2",
-    "superagent": "^3.5.2"
+    "body-parser": "latest",
+    "cheerio": "latest",
+    "compression": "latest",
+    "cookie-parser": "latest",
+    "express": "latest",
+    "https": "latest",
+    "moment": "latest",
+    "mongoose": "latest",
+    "passport": "latest",
+    "passport-google-oauth2": "latest",
+    "superagent": "latest"
   }
 }
