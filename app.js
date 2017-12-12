@@ -55,6 +55,10 @@ app.get('/', protected, (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
+app.get('/favicon.ico', protected, (req ,res) =>{
+  res.sendFile(__dirname + '/views/favicon.ico')
+})
+
 app.get('/*.(js|css|jpg|png)', protected, (req, res) => {
   res.sendFile(__dirname + '/views' + req.url)
 })
