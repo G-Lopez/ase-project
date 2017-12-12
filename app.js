@@ -55,9 +55,6 @@ app.get('/', protected, (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-app.get('/favicon.ico', protected, (req ,res) =>{
-  res.sendFile(__dirname + '/views/favicon.ico')
-})
 
 app.get('/*.(js|css|jpg|png)', protected, (req, res) => {
   res.sendFile(__dirname + '/views' + req.url)
@@ -331,7 +328,16 @@ let sendEmail = function(status, bookTitle, to_email, from_email) {
 app.post('/deleteRequest', protected, (req,res) =>{
   Request.deleteOne({from: req.cookies.email, to:req.body.to, isbn: req.body.isbn}, function (err, doc) {
     if(err) res.send('error deleting')
-    else res.send('deleted')
+    else{
+      Book.findOneAndUpdate({owner_email: req.body.to, isbn: req.body.isbn, status: 'Pending'}, {$set: {'status': 'Available'}}, {new: true}, function (err, book) {
+        if(err) res.send('Failed to update book')
+        console.log('Updated Book', book)
+        User.findOneAndUpdate({email: req.cookies.email}, {$inc: {'books_requested': -1}}, function (err, user) {
+          if(err)res.send('error updating user')
+          else res.send('deleted')
+        })
+      })
+    }
   })
 })
 
