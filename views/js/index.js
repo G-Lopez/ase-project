@@ -13,6 +13,7 @@ myApp.controller('navBarController', ['$scope', '$rootScope', 'searchResult', ($
   }
   $scope.advancedSearchNavBar = function() {
     $rootScope.$broadcast('switchingViews', 'advancedSearchPage')
+    console.log('this shouldnt change anything');
   }
 
   $scope.goHome = function() {
