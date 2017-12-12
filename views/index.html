@@ -93,6 +93,7 @@
     </div>
   </div>
 
+  <!-- Home Page, shows user book information -->
   <div class='homePage' ng-show='home' ng-controller='homePageController'>
     <div class='col-sm-6 left-side'>
       <h3 style='text-align:center' class='section-title'>Requests</h3>
@@ -148,13 +149,17 @@
     </div>
   </div>
 
+  <!-- Search page for either title book search or advanced search -->
   <div class='searchResult' ng-show='searchPage' ng-controller='searchResultPageController'>
-    Result Page<br>
+    <h3 style='text-align: center'>Results Page</h3><br><br>
     <span ng-show='results.length < 1'>Sorry, there were no results. Please try a different search.</span>
     <div ng-repeat='result in results'>
-      Title: {{result.title}}<br>
-      Author(s): {{result.authors}}<br><br>
-      <button class='btn btn-primary' ng-click='requestBook(result.owner_email, result.isbn)'>Request Book</button>
+      <div class='col-sm-8'>
+      Title: {{result.title || 'Not available'}}<br>
+      Author(s): {{result.authors || 'Not Available'}}<br>
+      ISBN: {{result.isbn || 'Not Available'}}  <br><br><br>
+    </div>
+      <button class='btn btn-primary col-sm-4' style='float: right' ng-click='requestBook(result.owner_email, result.isbn)'>Request Book</button>
     </div>
   </div>
 

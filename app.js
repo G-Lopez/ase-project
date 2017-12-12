@@ -9,6 +9,16 @@ const GOOGLE_API_KEY = 'key=AIzaSyAqcJLiH6zsbV4Cc3wxs454_DBqSg5lEy4'
 const DB_URI = 'mongodb://gabriel:gabrielase@ds125716.mlab.com:25716/ase-project'
 const https = require('https');
 
+//Setup for email sending
+const nodemailer = require('nodemailer')
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'lionsharecolumbia@gmail.com',
+    pass: 'ASEproject'
+  }
+});
+
 //Models
 const User = require('./models/user').User
 const Book = require('./models/book').Book
@@ -45,10 +55,6 @@ app.get('/', protected, (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-app.get('/favicon', (req, res)=>{
-  res.sendFile(__dirname + '/views/favicon.ico')
-})
-
 app.get('/*.(js|css|jpg|png)', protected, (req, res) => {
   res.sendFile(__dirname + '/views' + req.url)
 })
@@ -59,8 +65,6 @@ app.get('/getUserInfo', protected, (req, res) =>{
   User.findOne({
     email: req.cookies.email
   }).exec(function (err, resultingUser) {
-    console.log('resulting user', resultingUser);
-    console.log('typeof,', typeof(resultingUser));
     if(err){
       console.log('error with user', err);
     }else if(resultingUser == null /*|| Object.keys(resultingUser) ===0*/) { //Create new user
@@ -88,7 +92,6 @@ app.get('/getUserInfo', protected, (req, res) =>{
 
 //Update given user field
 app.post('/updateUserInfo', protected, (req, res) =>{
-  console.log('THE BODY', req.body);
   fields = JSON.parse(req.body.fields)
 
   for (let field in fields) {
@@ -119,7 +122,7 @@ app.get('/userBooks', protected, (req, res) =>{
 })
 
 //Get the requests that correspond to a specific user.
-app.get('/userRequests', (req,res) =>{
+app.get('/userRequests', protected, (req,res) =>{
   requestObj = {}
   Request.find({from: req.cookies.email, status: 'Pending'}).exec(function(err, fromRequests) {
     requestObj.from = fromRequests
@@ -132,7 +135,7 @@ app.get('/userRequests', (req,res) =>{
 })
 
 //Get the borrow books of a specific user.
-app.get('/borrowedBooks', (req, res) =>{
+app.get('/borrowedBooks', protected, (req, res) =>{
   Book.find({lentTo: req.cookies.email}).exec(function(err, books) {
     if(err) res.send('There was a error getting borrowed books')
     else res.send(books)
@@ -141,7 +144,7 @@ app.get('/borrowedBooks', (req, res) =>{
 
 
 //TItle quick search for Nav Bar
-app.post('/search/:collection', (req,res) =>{
+app.post('/search/:collection', protected, (req,res) =>{
   console.log('params',req.params)
   console.log('body', req.body);
   if(req.params.collection === 'books'){
@@ -157,7 +160,7 @@ app.post('/search/:collection', (req,res) =>{
 })
 
 //Look up a book using google books api when in the process of adding a new one.
-app.post('/bookLookup', (req, res) =>{
+app.post('/bookLookup', protected, (req, res) =>{
   console.log('Looking Up: ',req.body.isbn);
   let options = {
     hostname: 'www.googleapis.com',
@@ -191,25 +194,35 @@ app.post('/bookLookup', (req, res) =>{
 })
 
 //Add a book once you have successfully looked one up
-app.post('/addBook', (req,res) =>{
+app.post('/addBook', protected, (req,res) =>{
   let book_info = JSON.parse(req.body.book)
-  let new_book = new Book({
-    title: book_info.volumeInfo.title,
-    authors: book_info.volumeInfo.authors.join(', '),
-    isbn: Number(book_info.volumeInfo.industryIdentifiers[1].identifier),
-    publisher: book_info.volumeInfo.publisher,
-    pages: book_info.volumeInfo.pageCount,
+  Book.findOne({
+    isbn: book_info.volumeInfo.industryIdentifiers[1].identifier,
     owner_email: req.cookies.email,
-    status: 'Available',
-    lentTo: null
-  })
-  new_book.save(function(err) {
-    if(err){
-       console.log('Error saving book', err);
-       res.send('error: saving book')
-     }else{
-       res.send('success')
-     }
+    status: { $in: ['Pending', 'Available'] }
+  }).exec(function (err, book) {
+    if(err) res.send('Error getting book.')
+    if(book) res.send('Already Exists')
+    else {
+      let new_book = new Book({
+        title: book_info.volumeInfo.title,
+        authors: book_info.volumeInfo.authors.join(', '),
+        isbn: Number(book_info.volumeInfo.industryIdentifiers[1].identifier),
+        publisher: book_info.volumeInfo.publisher,
+        pages: book_info.volumeInfo.pageCount,
+        owner_email: req.cookies.email,
+        status: 'Available',
+        lentTo: null
+      })
+      new_book.save(function(err) {
+        if(err){
+           console.log('Error saving book', err);
+           res.send('error: saving book')
+         }else{
+           res.send('success')
+         }
+      })
+    }
   })
 })
 
@@ -252,6 +265,7 @@ app.post('/updateRequest', protected, (req,res) =>{
           if(err)res.send('error updating user')
           User.findOneAndUpdate({email: req.body.from}, {$inc: {'books_requested': -1}}, function (err, user2) {
             if(err)res.send('error updating user')
+            sendEmail('Approved', book.title, req.body.from, req.cookies.email)
             res.send('success')
           })
         })
@@ -264,6 +278,7 @@ app.post('/updateRequest', protected, (req,res) =>{
         User.findOneAndUpdate({email: req.body.from}, {$inc: {'books_requested': -1}}, function (err, user) {
           console.log('finishing up denial');
           if(err)res.send('error updating user')
+          sendEmail('Denied', book.title, req.body.from, null)
           res.send('success')
         })
       })
@@ -271,6 +286,42 @@ app.post('/updateRequest', protected, (req,res) =>{
     else res.send('Not Correct formatting')
   })
 })
+
+//Helper function for sending emails for accepted/denied requests
+let sendEmail = function(status, bookTitle, to_email, from_email) {
+
+  if(status == 'Denied'){
+    let options = {
+      from: 'lionsharecolumbia@gmail.com',
+      to: to_email,
+      subject: 'Request Update For ' + bookTitle + ': Denied',
+      text: 'Hello,\n\nWe are sorry to inform you that your request for ' + bookTitle + ' has been denied. Please feel free to search for another copy of the book on LionShare!\n\nBest,\nThe LionShare Team'
+    }
+    transporter.sendMail(options, function(err, info){
+      if (err) {
+        console.log(err);
+      }else {
+        console.log('Email sent: ' + info.response);
+      }
+    })
+  }else if(status == 'Approved'){
+    let options = {
+      from: 'lionsharecolumbia@gmail.com',
+      to: to_email,
+      subject: 'Request Update For ' + bookTitle + ': Accepted!',
+      text: 'Hello,\n\nWe are pleased to inform you that your request for ' + bookTitle + ' has been accepted! Please reach out to ' + from_email + ' to coordinate logistics. We are pleased that you were able to find the book you wanted!\n\nBest,\nThe LionShare Team'
+    }
+    transporter.sendMail(options, function(err, info){
+      if (err) {
+        console.log(err);
+      }else {
+        console.log('Email sent: ' + info.response);
+      }
+    })
+  } else return 'Invalid Status'
+}
+
+
 
 //Delete request
 app.post('/deleteRequest', protected, (req,res) =>{
@@ -280,7 +331,7 @@ app.post('/deleteRequest', protected, (req,res) =>{
   })
 })
 
-app.post('/advancedSearch', (req, res) =>{
+app.post('/advancedSearch', protected, (req, res) =>{
   formInputs = JSON.parse(req.body.mongo)
   mongoObj = {status: 'Available'}
 

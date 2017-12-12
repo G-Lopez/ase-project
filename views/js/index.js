@@ -44,18 +44,25 @@ myApp.controller('addBookController', ['$scope', '$rootScope', 'userInfo',  ($sc
   }
 
   $scope.addBooktoDB = function() {
-    $.post('/addBook', {book: JSON.stringify($scope.searchedBook)}, function(response) {
-      console.log(response);
-      if(response === 'success'){
-        $('#addBookModal').modal('hide')
-        userInfo.updateUser({books_added: 1}, function(user) {
-          $rootScope.user = user
-          alert('Saved Successfully')
-          $rootScope.$broadcast('switchingViews', 'homePage')
-          $scope.$apply()
-        })
-      } else alert('Something went wrong, please try again.')
-    })
+    if($rootScope.user.books_added >= 5){
+      alert('You cannot add anymore books. Please wait until somebody borrows one of your books or remove one.')
+    } else{
+      console.log($scope.searchedBook);
+      $.post('/addBook', {book: JSON.stringify($scope.searchedBook)}, function(response) {
+        console.log(response);
+        if(response === 'success'){
+          $('#addBookModal').modal('hide')
+          userInfo.updateUser({books_added: 1}, function(user) {
+            $rootScope.user = user
+            alert('Saved Successfully')
+            $rootScope.$broadcast('switchingViews', 'homePage')
+            $scope.$apply()
+          })
+        } else if(response == 'Already Exists'){
+          alert('You have already added this book. Please try again with a different book.')
+        } else alert('Something went wrong, please try again.')
+      })
+    }
   }
 }])
 
@@ -121,9 +128,9 @@ myApp.controller('searchResultPageController', ['$scope', '$rootScope', 'searchR
   })
 
   $scope.requestBook = function(owner_email, isbn) {
-    /*if(owner_email === $rootScope.user.email){
+    if(owner_email === $rootScope.user.email){
       alert('Cannot request a book you own')
-    }else */if($rootScope.user.books_requested >= 5){
+    }else if($rootScope.user.books_requested >= 5){
       alert('You have reached your request limit, please resolve some requests before making another')
     }else{
       $.post('/makeRequest', {owner_email: owner_email, isbn: isbn}, function(requestResponse) {

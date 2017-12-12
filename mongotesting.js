@@ -18,9 +18,16 @@ const Request = require('./models/request').Request
 const db = mongoose.connect(DB_URI, {useMongoClient: true})
 
 
-let bn = 316228559
-let email = "gal2129@columbia.edu"
-
-Book.deleteOne({owner_email: email, isbn: bn}, function (err, doc) {
-  console.log(doc);
+let isbn = 1408865459
+let owner_email = "kaa2171@columbia.edu"
+Book.findOne({
+  isbn: isbn,
+  owner_email: owner_email,
+  status: { $in: ['Pending', 'Available'] }
+}).exec(function (err, book) {
+  if(err) console.log('errrrrr');
+  if(book) console.log('ALready Exists');
+  else {
+    console.log('yipyip!');
+  }
 })

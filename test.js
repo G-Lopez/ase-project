@@ -30,7 +30,7 @@ console.log(temp);
 str = 'j.k. rowling'
 
 console.log(str.split(/[ ,.]+/));
-*/
+
 
 let obj = {}
 obj['fields'] = {}
@@ -46,3 +46,32 @@ for (let field in fields) {
   //validation
   console.log((field == 'books_added' || field == 'books_requested') && (fields[field] == 1 || fields[field] == -1))
 }
+
+*/
+
+const nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'lionsharecolumbia@gmail.com',
+    pass: 'ASEproject'
+  }
+});
+
+randoVar = 2
+
+let mailOptions = {
+  from: 'lionsharecolumbia@gmail.com',
+  to: 'gal2129@columbia.edu',
+  subject: 'Sending Email using Node.js',
+  text: 'That was easier..?!' + randoVar
+}
+
+transporter.sendMail(mailOptions, function(error, info){
+  if (error) {
+    console.log(error);
+  } else {
+    console.log('Email sent: ' + info.response);
+  }
+});
