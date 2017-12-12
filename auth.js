@@ -39,7 +39,7 @@ app.get('/login', passport.authenticate('google', {
 app.get('/google/clb', passport.authenticate('google', {failureRedirect: '/sorry'}), saveUserAndRedirect)
 
 app.get('/sorry', (res, req) =>{
-  res.redirect('loginFailed.html')
+  res.redirect('Invalid Login')
 })
 
 module.exports = app

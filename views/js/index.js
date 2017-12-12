@@ -22,9 +22,8 @@ myApp.controller('navBarController', ['$scope', '$rootScope', 'searchResult', ($
   }
 
   $scope.logout = function () {
-    $.get('/logout', (url) =>{
-      window.location = 'url'
-    })
+    document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+    window.location.replace('/')
   }
 }])
 
