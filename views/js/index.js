@@ -20,6 +20,12 @@ myApp.controller('navBarController', ['$scope', '$rootScope', 'searchResult', ($
     $('#navBarSearchBar').val('')
     $rootScope.$broadcast('switchingViews', 'homePage')
   }
+
+  $scope.logout = function () {
+    $.get('/logout', (url) =>{
+      window.location = 'url'
+    })
+  }
 }])
 
 myApp.controller('addBookController', ['$scope', '$rootScope', 'userInfo',  ($scope, $rootScope, userInfo) => {

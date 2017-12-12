@@ -43,7 +43,7 @@ const protected = (req, res, next) => {
   if (req.cookies.account) {
     next()
   } else {
-    return res.redirect('/login')
+    return res.send('/login')
   }
 }
 
@@ -58,6 +58,11 @@ app.get('/', protected, (req, res) => {
 
 app.get('/*.(js|css|jpg|png)', protected, (req, res) => {
   res.sendFile(__dirname + '/views' + req.url)
+})
+
+app.get('/logout', protected, (req, res) =>{
+  res.cookie("express.sid", "", { expires: new Date() })
+  res.redirect('/login')
 })
 
 //get user information given email. If user doesn't exist, create user with defaults.
