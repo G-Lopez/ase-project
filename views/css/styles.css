@@ -36,14 +36,14 @@
 }
 .owned-div{
   padding-right: 0px;
-  height:55%;
+  height:45vh;
   overflow-y: auto;
   border-bottom: solid 1px #696969
 }
 
 .borrowed-div{
   padding-right: 0px;
-  height: 40%;
+  height: 40vh;
   overflow-y: auto;
 }
 

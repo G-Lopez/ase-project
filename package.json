@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Advanced Software Engineering Term Project",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,16 @@
     "passport-google-oauth2": "latest",
     "superagent": "latest",
     "nodemailer": "^4.4.1"
-  }
+  },
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "mocha": "^4.0.1",
+    "pre-commit": "^1.2.2",
+    "requestify": "^0.2.5"
+  },
+  "pre-commit":[
+    "test"
+  ]
 }
